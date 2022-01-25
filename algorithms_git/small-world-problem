@@ -1,0 +1,198 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import pandas as pd\n",
+    "import numpy as np\n",
+    "from collections import defaultdict \n",
+    "import collections\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def loadGraph(edgefilename, sep):\n",
+    "    \n",
+    "    edges = pd.read_csv(edgefilename, sep= sep, header=None)\n",
+    "    \n",
+    "    edgearray = np.array(edges)\n",
+    "\n",
+    "    adj = dict()\n",
+    "\n",
+    "    for edge in edgearray:\n",
+    "        x, y = int(edge[0]), int(edge[1])\n",
+    "        if x not in adj: adj[x] = set()\n",
+    "        if y not in adj: adj[y] = set()\n",
+    "        adj[x].add(y)\n",
+    "        adj[y].add(x)\n",
+    "    return adj\n",
+    "\n",
+    "class MyQueue:\n",
+    "    def __init__(self):\n",
+    "        self.queue = []\n",
+    "    def enqueue(self, item):\n",
+    "        self.queue.append(item)\n",
+    "    def dequeue(self):\n",
+    "        if not self.empty():\n",
+    "            item = self.queue[0]\n",
+    "            self.queue = self.queue[1:]\n",
+    "            return item\n",
+    "        else:\n",
+    "            print(\"Empty\")\n",
+    "    def empty(self):\n",
+    "        return len(self.queue) == 0 \n",
+    "def bfs(G, s):\n",
+    "    queue = MyQueue()\n",
+    "    level = {s: 0}\n",
+    "    parent = {s: None}\n",
+    "    while queue:\n",
+    "        queue.enqueue(s)\n",
+    "        v = queue.dequeue()\n",
+    "        for n in graph[v]:\n",
+    "            if n not in level:            \n",
+    "                queue.enqueue(n)\n",
+    "                level[n] = level[v] + 1\n",
+    "                parent[n] = v\n",
+    "    return level, parent\n",
+    "\n",
+    "def DistList(G, s):\n",
+    "    bfs_dist= bfs(G, s)\n",
+    "    bfs2 = pd.DataFrame(bfs_dist)\n",
+    "\n",
+    "    a= bfs2.transpose().values.tolist()\n",
+    "    a= pd.DataFrame(a)\n",
+    "    a.columns = ['distance', 'parent']\n",
+    "    dist_list = a['distance']\n",
+    "    return dist_list\n",
+    "\n",
+    "def DistanceDistribution(Distlist):\n",
+    "        freq= {}\n",
+    "        for item in Distlist:\n",
+    "            if(item in freq):\n",
+    "                freq[item] +=1\n",
+    "            else:\n",
+    "                freq[item] = 1\n",
+    "        num_list = []\n",
+    "        key_list = []\n",
+    "        for key, value in freq.items():\n",
+    "            num_list.append(value)\n",
+    "            key_list.append(key)\n",
+    "\n",
+    "\n",
+    "        list_sum = sum(num_list)\n",
+    "        percent = []\n",
+    "        for vals in num_list:\n",
+    "            indiv_percent = (vals/list_sum)\n",
+    "            indiv_percent = \"{:.2%}\".format(indiv_percent)\n",
+    "            percent.append(indiv_percent)\n",
+    "            \n",
+    "        perc = pd.DataFrame(list(zip(key_list, num_list, percent)))\n",
+    "        perc.columns = [\"Distance\", \"Count of Distance\", \"Percent of Distances\"]\n",
+    "        perc.index = perc['Distance']\n",
+    "        perc = perc.drop('Distance', axis = 1)\n",
+    "    \n",
+    "        print(perc)\n",
+    "        \n",
+    "def display(G, s):\n",
+    "    print(\"BFS Search:\", bfs(G, s))\n",
+    "    print(\"\")\n",
+    "    print(\"Distance Distribution Dictionary:\")\n",
+    "    print(DistanceDistribution(DistList(G, s)))\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "{0: {2}, 2: {0, 1, 5}, 5: {2}, 1: {2, 3, 4}, 3: {1, 4}, 4: {1, 3}}\n"
+     ]
+    }
+   ],
+   "source": [
+    "#testing code with small sample\n",
+    "\n",
+    "graph = loadGraph(\"testedges.csv\", \",\")\n",
+    "print(graph)\n",
+    "display(graph, 2)\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Empty\n"
+     ]
+    },
+    {
+     "ename": "KeyError",
+     "evalue": "None",
+     "output_type": "error",
+     "traceback": [
+      "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+      "\u001b[0;31mKeyError\u001b[0m                                  Traceback (most recent call last)",
+      "\u001b[0;32m<ipython-input-13-d9f5213982a3>\u001b[0m in \u001b[0;36m<module>\u001b[0;34m\u001b[0m\n\u001b[1;32m      1\u001b[0m \u001b[0;31m#Testing with large dataset from Canvas\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      2\u001b[0m \u001b[0mgraph\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mloadGraph\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m\"edges.txt\"\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;34m\" \"\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m----> 3\u001b[0;31m \u001b[0mdisplay\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mgraph\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0;36m20\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m",
+      "\u001b[0;32m<ipython-input-11-a698c50b0bb9>\u001b[0m in \u001b[0;36mdisplay\u001b[0;34m(G, s)\u001b[0m\n\u001b[1;32m     82\u001b[0m \u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     83\u001b[0m \u001b[0;32mdef\u001b[0m \u001b[0mdisplay\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mG\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0ms\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m---> 84\u001b[0;31m     \u001b[0mprint\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m\"BFS Search:\"\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mbfs\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mG\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0ms\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m     85\u001b[0m     \u001b[0mprint\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m\"\"\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     86\u001b[0m     \u001b[0mprint\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m\"Distance Distribution Dictionary:\"\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+      "\u001b[0;32m<ipython-input-11-a698c50b0bb9>\u001b[0m in \u001b[0;36mbfs\u001b[0;34m(G, s)\u001b[0m\n\u001b[1;32m     36\u001b[0m     \u001b[0;32mwhile\u001b[0m \u001b[0mqueue\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     37\u001b[0m         \u001b[0mv\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mqueue\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mdequeue\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m---> 38\u001b[0;31m         \u001b[0;32mfor\u001b[0m \u001b[0mn\u001b[0m \u001b[0;32min\u001b[0m \u001b[0mgraph\u001b[0m\u001b[0;34m[\u001b[0m\u001b[0mv\u001b[0m\u001b[0;34m]\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m     39\u001b[0m             \u001b[0;32mif\u001b[0m \u001b[0mn\u001b[0m \u001b[0;32mnot\u001b[0m \u001b[0;32min\u001b[0m \u001b[0mlevel\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m     40\u001b[0m                 \u001b[0mqueue\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0menqueue\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mn\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+      "\u001b[0;31mKeyError\u001b[0m: None"
+     ]
+    }
+   ],
+   "source": [
+    "#Testing with large dataset from Canvas\n",
+    "graph = loadGraph(\"edges.txt\", \" \")\n",
+    "display(graph, 20)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 53,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#The output from the BFS on the large edge dataset does satisfy the small world problem, as the final output distrubution is mostly normally\n",
+    "#distributed, with a mean toward around 4 degrees of distance. Thus, though the large dataser is indeed, quite large,\n",
+    "#most of the distane between nodes tends to fall in a smaller distance, i.e., most nodes can be reached with the small\n",
+    "#distances of 3 or 4."
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.3"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}
